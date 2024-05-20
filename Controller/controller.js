@@ -5,8 +5,9 @@ const { client } = require("../DB/connectDB");
 const stripe = require("stripe")("your_stripe_secret_key");
 
 const register = async (req, res) => {
+  console.log("Working");
   const { name, email, phone, pass } = req.body;
-  console.log({ name, email, phone, pass });
+  console.log("Signing up user ");
 
   try {
     const emailAlreadyExists = await client.query(
@@ -14,9 +15,7 @@ const register = async (req, res) => {
       [email]
     );
     if (emailAlreadyExists.rowCount != 0) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "User already exists" });
+      return res.status(400).json({ msg: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(pass, 10);
@@ -59,17 +58,13 @@ const login = async (req, res) => {
     );
 
     if (userResult.rowCount === 0) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ msg: "Invalid credentials" });
+      return res.status(500).json({ msg: "Invalid credentials" });
     }
 
     const user = userResult.rows[0];
     const isPasswordCorrect = await bcrypt.compare(pass, user.pass);
     if (!isPasswordCorrect) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ msg: "Invalid credentials" });
+      return res.status(500).json({ msg: "Invalid credentials" });
     }
 
     const tokenUser = { name: user.email, userId: user.pass };
