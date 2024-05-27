@@ -139,9 +139,10 @@ const create_checkout_session = async (req, res) => {
 
 const getallCater = async (req, res) => {
   try {
-    const response = await client.query("select * from caterdetails");
+    const response = await client.query("select * from cater");
     if (response.rowCount === 0) {
       res.status(400).json({ msg: "No catering found !" });
+      console.log("No cater found");
     }
     res.status(200).json({ data: response.rows });
   } catch (error) {
