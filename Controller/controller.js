@@ -83,6 +83,11 @@ const login = async (req, res) => {
   }
 };
 
+const addApurchase = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
 const getCatermenu = async (req, res) => {
   console.log("Getting cater menu");
   let catername = "";
@@ -150,10 +155,59 @@ const getallCater = async (req, res) => {
   }
 };
 
+const addOrderToProfile = async (req, res) => {
+  try {
+    const { gmail, catername, totalAmount } = req.body;
+    const amount = totalAmount;
+    console.log(gmail);
+    console.log(gmail.split("@")[0]);
+    let newGmail = gmail.split("@")[0];
+    newGmail += "gmailid";
+    const tableName = `ordertable_${newGmail}`;
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${tableName} (
+        id SERIAL PRIMARY KEY,
+        catername VARCHAR(40),
+        amount INT,
+        order_date DATE DEFAULT CURRENT_DATE
+      )
+    `);
+
+    await client.query(
+      `INSERT INTO ${tableName} (catername, amount) VALUES ($1, $2)`,
+      [catername, amount]
+    );
+
+    res.status(200).json({ msg: "Success" });
+  } catch (error) {
+    console.error("Error in adding order to profile:", error);
+    res
+      .status(500)
+      .json({ msg: "Error in adding order to profile", error: error.message });
+  }
+};
+
+const getOrderDetails = async (req, res) => {
+  try {
+    const { gmail } = req.body;
+    let newGmail = gmail.split("@")[0];
+    newGmail += "gmailid";
+    const tableName = `ordertable_${newGmail}`;
+    const response = await client.query(`select * from ${tableName}`);
+    console.log("Retrieved order details");
+    res.status(200).json({ data: response.rows });
+  } catch (error) {
+    console.log("Error in getting order details :", error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getCatermenu,
   create_checkout_session,
   getallCater,
+  addOrderToProfile,
+  getOrderDetails,
 };
